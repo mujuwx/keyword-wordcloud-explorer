@@ -34,6 +34,18 @@ stopwords.update({
 
 if uploaded_file:
     df = pd.read_excel(uploaded_file)
+
+    df[VOLUME_COLUMN] = (
+    df[VOLUME_COLUMN]
+    .astype(str)
+    .str.replace(",", "", regex=False)
+    .str.strip()
+)
+
+df[VOLUME_COLUMN] = pd.to_numeric(
+    df[VOLUME_COLUMN],
+    errors="coerce"
+)
     df = df.dropna(subset=[KEYWORD_COLUMN, VOLUME_COLUMN])
 
     word_frequencies = Counter()

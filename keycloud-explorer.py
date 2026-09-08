@@ -35,17 +35,21 @@ stopwords.update({
 if uploaded_file:
     df = pd.read_excel(uploaded_file)
 
+    # Convert Search Volume to numeric
+    # This ensures values are sorted as numbers rather than text
     df[VOLUME_COLUMN] = (
-    df[VOLUME_COLUMN]
-    .astype(str)
-    .str.replace(",", "", regex=False)
-    .str.strip()
-)
+        df[VOLUME_COLUMN]
+        .astype(str)
+        .str.replace(",", "", regex=False)
+        .str.strip()
+    )
 
-df[VOLUME_COLUMN] = pd.to_numeric(
-    df[VOLUME_COLUMN],
-    errors="coerce"
-)
+    df[VOLUME_COLUMN] = pd.to_numeric(
+        df[VOLUME_COLUMN],
+        errors="coerce"
+    )
+
+    # Remove rows without a keyword phrase or valid search volume
     df = df.dropna(subset=[KEYWORD_COLUMN, VOLUME_COLUMN])
 
     word_frequencies = Counter()
@@ -58,7 +62,9 @@ df[VOLUME_COLUMN] = pd.to_numeric(
             if word not in stopwords:
                 word_frequencies[word] += 1
 
-    top_word_frequencies = dict(word_frequencies.most_common(TOP_X_TERMS))
+    top_word_frequencies = dict(
+        word_frequencies.most_common(TOP_X_TERMS)
+    )
 
     wordcloud = WordCloud(
         width=1600,
@@ -80,7 +86,10 @@ df[VOLUME_COLUMN] = pd.to_numeric(
         df[KEYWORD_COLUMN]
         .astype(str)
         .str.lower()
-        .str.contains(rf"\b{re.escape(selected_word)}\b", regex=True)
+        .str.contains(
+            rf"\b{re.escape(selected_word)}\b",
+            regex=True
+        )
     ][[KEYWORD_COLUMN, VOLUME_COLUMN]]
 
     matching_rows = matching_rows.sort_values(
@@ -88,5 +97,11 @@ df[VOLUME_COLUMN] = pd.to_numeric(
         ascending=False
     )
 
-    st.subheader(f"Keyword phrases containing '{selected_word}'")
-    st.dataframe(matching_rows, use_container_width=True)
+    st.subheader(
+        f"Keyword phrases containing '{selected_word}'"
+    )
+
+    st.dataframe(
+        matching_rows,
+        use_container_width=True
+    )
